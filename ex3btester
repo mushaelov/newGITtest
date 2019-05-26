@@ -1,0 +1,30 @@
+import java.io.BufferedReader;
+
+
+public class Ex3B_tester {
+
+	public static void main(String[] args) throws ExecutionException,InterruptedException, IOException {
+		// TODO Auto-generated method stub
+
+		
+int num=1000;
+Ex3B.countLinesThreads(num);
+Ex3B.countLinesThreadPool(num);
+Ex3B.countLinesOneProcess(num);
+	
+
+ 
+
+		
+		
+		
+		
+		
+       
+	
+	}
+
+	
+	
+	
+}
