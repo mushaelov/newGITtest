@@ -1,0 +1,256 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+/**
+ * 
+ * A class which does a comparison between 3 variations of the
+ * same algorithm which creates files,write in them and counts 
+ * the number of rows in each file.
+ * the 3 variations are:1.Single Thread algorithm,2.Multiple Threads
+ * algorithm,3.No threads algorithm.
+ *
+ */
+public class Ex3B implements Callable<Boolean>{
+	public static int count=0;
+	public static int count2=0;
+	/**
+	 * 
+	 * A method which takes in an integer and creates files in the 
+	 * amount of that integer.
+	 */
+	public static String[] createFiles(int n) throws IOException {
+		
+		Random r=new Random(200);
+		 int numLines = r.nextInt(1000);
+		
+		String helloworld="Hello World";
+		File array[]=new File[n];
+		String c[]=new String[n];
+		for (int i = 0; i < c.length; i++) {
+			c[i]=Integer.toString(i);
+		}
+		String b[]=new String[n];
+		for (int i = 0; i < n; i++) {
+			array[i]=new File("C:\\Users\\michael\\Desktop\\rand\\File_"+c[i]+".txt");
+			b[i]=array[i].getAbsolutePath();
+		array[i].createNewFile();
+		PrintWriter write=new PrintWriter(array[i]);
+		
+		for (int j = 0; j < numLines; j++) {
+			
+			write.println(helloworld);
+			
+		}
+		write.close();
+		
+		}
+		
+
+		return b;
+		
+	}
+	
+	/**
+	 * 
+	 * A method which takes an array of paths to files
+	 * and deletes them all.
+	 */
+	public static void deleteFiles(String[] fileNames) {
+		File a[]=new File[fileNames.length];
+		for (int i = 0; i < fileNames.length; i++) {
+			a[i]=new File(fileNames[i]);
+			a[i].delete();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * The Single Thread algorithm.
+	 * Prints the running time of the algorithm and the number of
+	 * rows in each of the files combined.
+	 */
+	public static void countLinesThreads(int numFiles) throws IOException {
+		long start=System.currentTimeMillis();
+		
+		
+		Ex3B j=new Ex3B();
+		
+	j.createFiles(numFiles);
+		ExecutorService a=Executors.newSingleThreadExecutor();
+		a.submit(new Ex3B() {
+			public Boolean call() {
+				// TODO Auto-generated method stub
+				
+				BufferedReader []br=new BufferedReader[numFiles];
+				FileReader fr[]=new FileReader[numFiles];
+				try {
+					
+					
+					
+					String line="";
+					for (int i = 0; i < numFiles; i++) {
+						String kk=Integer.toString(i);
+						fr[i]=new FileReader("C:\\Users\\michael\\Desktop\\rand\\File_"+kk+".txt");
+						br[i]=new BufferedReader(fr[i]);			
+						while((line=br[i].readLine()) != null){
+							
+						j.count++;
+					}
+//						
+//					
+					}
+					long end=System.currentTimeMillis();
+					System.out.println("(Single Thread) runtime in milliseconds:"+(end-start)+"milliseconds");
+					System.out.println("num of rows in all files together:"+j.count);
+					for (int m = 0; m < numFiles; m++) {
+						br[m].close();
+						fr[m].close();
+					}
+					
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return null;
+			}
+		});
+		a.shutdown();
+		
+
+j.count=0;
+Ex3B.deleteFiles(Ex3B.createFiles(numFiles));
+
+	}
+	
+	
+	
+	/**
+	 * 
+	 * The Multiple Threads algorithm.
+	 * Prints the running time of the algorithm and the number of
+	 * rows in each of the files combined.
+	 */
+	public static void countLinesThreadPool(int num) throws IOException {
+long start=System.currentTimeMillis();
+		
+		
+		Ex3B j=new Ex3B();
+		
+	j.createFiles(num);
+		
+		
+			ExecutorService service=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+			Future<Boolean> fut=service.submit(new Ex3B() {
+			@Override
+			public Boolean call() throws Exception{
+				// TODO Auto-generated method stub
+				
+				BufferedReader []br=new BufferedReader[num];
+				FileReader fr[]=new FileReader[num];
+				try {
+					
+					
+					
+					String line="";
+					for (int i = 0; i < num; i++) {
+						String kk=Integer.toString(i);
+						fr[i]=new FileReader("C:\\Users\\michael\\Desktop\\rand\\File_"+kk+".txt");
+						br[i]=new BufferedReader(fr[i]);			
+						while((line=br[i].readLine()) != null){
+							
+						j.count++;
+					}
+//						
+//					
+					}
+					long end=System.currentTimeMillis();
+					System.out.println("(ThreadPool) runtime in milliseconds:"+(end-start)+"milliseconds");
+					System.out.println("num of rows in all files together:"+j.count);
+					for (int m = 0; m < num; m++) {
+						br[m].close();
+						fr[m].close();
+					}
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return null;
+			}
+		});
+		service.shutdown();
+		
+
+j.count=0;
+Ex3B.deleteFiles(Ex3B.createFiles(num));
+	}
+	
+	
+	
+	/**
+	 * 
+	 * The No Threads algorithm.
+	 * Prints the running time of the algorithm and the number of
+	 * rows in each of the files combined.
+	 */
+	public static void countLinesOneProcess(int numFiles) throws IOException {
+		long start=System.currentTimeMillis();
+Ex3B j=new Ex3B();
+j.createFiles(numFiles);
+		BufferedReader []br=new BufferedReader[numFiles];
+		FileReader fr[]=new FileReader[numFiles];
+		try {
+			String line="";
+			for (int i = 0; i < numFiles; i++) {
+				String kk=Integer.toString(i);
+				fr[i]=new FileReader("C:\\Users\\michael\\Desktop\\rand\\File_"+kk+".txt");
+				br[i]=new BufferedReader(fr[i]);			
+				while((line=br[i].readLine()) != null){
+					
+				j.count2++;
+			}
+//				
+//			
+			}
+			long end=System.currentTimeMillis();
+			System.out.println("(no Threads) runtime in milliseconds:"+(end-start)+"milliseconds");
+			System.out.println("num of rows in all files together:"+j.count2);
+			for (int m = 0; m < numFiles; m++) {
+				br[m].close();
+				fr[m].close();
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+	
+		j.count=0;
+		Ex3B.deleteFiles(Ex3B.createFiles(numFiles));
+	
+	
+	}
+
+
+	
+
+
+	@Override
+	public Boolean call() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	
+}
